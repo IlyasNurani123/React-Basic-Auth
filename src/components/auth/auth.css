@@ -1,0 +1,23 @@
+.card-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-card {
+  margin-top: 50px;
+  width: 32rem;
+  border-radius: 10px;
+}
+
+.custom-card-header {
+  color: #343a40 !important;
+  background-color: #f8f9fa !important;
+  text-align: center;
+}
+.custom-button {
+  width: 120px;
+  border: #343a40 !important;
+  color: #ffffff !important;
+  margin-left: 40%;
+}

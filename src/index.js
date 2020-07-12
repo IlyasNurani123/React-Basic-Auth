@@ -3,11 +3,19 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import Firebase, { FirebaseContext } from './firebse';
+import { ProjectsProvider } from './context-api/projectsContext';
+import { TasksContextProvider } from './context-api/tasksContext';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <FirebaseContext.Provider value={new Firebase()}>
+    <ProjectsProvider>
+      <TasksContextProvider>
+        <App />
+      </TasksContextProvider>
+    </ProjectsProvider>
+  </FirebaseContext.Provider>,
+
   document.getElementById('root')
 );
 
