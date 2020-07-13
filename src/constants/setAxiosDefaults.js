@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { SERVER_URL_LOCAL } from './constants';
-
+import { SERVER_URL_LOCAL } from './urlConstants';
 axios.defaults.baseURL = SERVER_URL_LOCAL;
 // axios.defaults.headers.common['Authorization'] =
 //   'Bearer ' + window.localStorage.getItem('token');

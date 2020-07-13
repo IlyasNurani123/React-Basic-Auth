@@ -4,10 +4,6 @@ class CustomModal extends Component {
   render() {
     return (
       <>
-        {/* <Button variant='primary' onClick={handleShow}>
-          Launch static backdrop modal
-        </Button> */}
-
         <Modal
           show={this.props.show}
           onHide={this.props.handleClose}

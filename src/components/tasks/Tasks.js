@@ -5,23 +5,48 @@ import CustomModal from '../layouts/CustomModal';
 import CustomAlert from '../layouts/CustomAlert';
 import { TasksContext } from '../../context-api/tasksContext';
 import { Projects } from '../../context-api/projectsContext';
-import { getTasks, addTask, deleteTask } from '../../services/tasksServices';
+import { WithAuthorization } from '../../context-api/session';
+import {
+  getTasks,
+  addTask,
+  deleteTask,
+  getTask,
+  updateTask,
+} from '../../services/tasksServices';
 import { getProjects } from '../../services/projects-services';
 
 function Tasks(props) {
   const [taskState, setTasks] = useState({
     task_name: '',
     project_id: null,
+    task_id: null,
     completion_date: '',
     total_hours_worked: '',
   });
+
   const task = useContext(TasksContext);
   const project = useContext(Projects);
   const [show, setShow] = useState(false);
   const [showAlert, setshowAlert] = useState(false);
+  // const [tasksArray, setTask] = useState([]);
   const { tasks = [] } = task.state;
   // const [taskArray, setTaskArray] = useState(tasks);
   const handleOnShow = () => setShow(true);
+  const handleOnShowUpdate = (id) => {
+    setShow(true);
+    setTasks({
+      task_id: id,
+    });
+    getTask(id).then((response) => {
+      setTasks({
+        task_name: response.task_name,
+        project_id: response.project_id,
+        task_id: response.id,
+        completion_date: response.completion_date,
+        total_hours_worked: response.total_hours_worked,
+      });
+    });
+  };
   const handleClose = () => setShow(false);
   const handleShowAlert = () => setshowAlert(true);
   const handleCancelAlert = () => setshowAlert(false);
@@ -32,25 +57,33 @@ function Tasks(props) {
 
   function onSubmit(e) {
     e.preventDefault();
-    console.log(taskState);
-    // const {
-    //   task_name,
-    //   project_id,
-    //   completion_date,
-    //   total_hours_worked,
-    // } = tasks;
-    addTask(taskState)
-      .then((response) => {
-        task.dispatch({
-          type: 'ADD_TASKS',
-          payload: response,
+    if (!taskState.task_id) {
+      addTask(taskState)
+        .then((response) => {
+          task.dispatch({
+            type: 'ADD_TASKS',
+            payload: response,
+          });
+          handleClose();
+        })
+        .catch((error) => {
+          console.log(error);
         });
-        handleClose();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    } else {
+      updateTask(taskState.task_id, taskState)
+        .then((response) => {
+          task.dispatch({
+            type: 'UPDATE_TASKS',
+            payload: response,
+          });
+          handleClose();
+        })
+        .catch((error) => {
+          console.log('******error***', error);
+        });
+    }
   }
+
   const taskDelete = (id) => {
     deleteTask(id)
       .then((response) => {
@@ -76,7 +109,6 @@ function Tasks(props) {
     });
     getTasks()
       .then((response) => {
-        // debugger;
         task.dispatch({
           type: 'FETCH_TASKS',
           payload: response,
@@ -88,11 +120,12 @@ function Tasks(props) {
   }, []);
 
   // useEffect(() => {
-  //   setTaskArray(tasks);
+  //   setTask(tasks);
   // }, [tasks]);
 
   return (
     <SideMainLayout>
+      {console.log('investigate task:', tasks)}
       <Container>
         <Card>
           <Card.Header>
@@ -102,7 +135,7 @@ function Tasks(props) {
             <CustomModal
               show={show}
               handleClose={handleClose}
-              title='Add Tasks'
+              title={taskState.task_id ? 'Update project' : 'Add Project'}
               actionText='Submit'
             >
               <Form onSubmit={onSubmit}>
@@ -121,14 +154,15 @@ function Tasks(props) {
                     as='select'
                     name='project_id'
                     onChange={handleOnChange}
-                    value={taskState.id}
+                    value={taskState.project_id}
+                    selected
                   >
                     {/* {console.log('value', project.state.projects)} */}
                     <option>Select Project</option>
-                    {project.state.projects.map((task) => {
+                    {project.state.projects.map((project) => {
                       return (
-                        <option key={task.id} value={task.id}>
-                          {task.name}
+                        <option key={project.id} value={project.id}>
+                          {project.name}
                         </option>
                       );
                     })}
@@ -182,7 +216,7 @@ function Tasks(props) {
                     <tr key={`task-${index}`}>
                       <td>{task.id}</td>
                       <td>{task.task_name}</td>
-                      <td>{task.project_name}</td>
+                      <td>{task.name}</td>
                       <td>{task.completion_date}</td>
                       <td>{task.total_hours_worked}</td>
                       <td>
@@ -194,7 +228,11 @@ function Tasks(props) {
                           confirmText='Confirm'
                           confirmedAction={taskDelete.bind(this, task.id)}
                         />
-                        <Button className='mr-2' size='sm'>
+                        <Button
+                          className='mr-2'
+                          size='sm'
+                          onClick={handleOnShowUpdate.bind(this, task.id)}
+                        >
                           edit
                         </Button>
                         <Button
@@ -217,5 +255,5 @@ function Tasks(props) {
     </SideMainLayout>
   );
 }
-
-export default Tasks;
+const condition = (authUser) => !!authUser;
+export default WithAuthorization(condition)(Tasks);

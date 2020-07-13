@@ -3,22 +3,26 @@ import SideMainLayout from '../layouts/SideMainLayout';
 import { Button, Card, Container, Table, Form } from 'react-bootstrap';
 import CustomModal from '../layouts/CustomModal';
 import CustomAlert from '../layouts/CustomAlert';
+import { WithAuthorization } from '../../context-api/session';
 import {
   getProjects,
   addProject,
   deleteProject,
 } from '../../services/projects-services';
 import withProject from '../../context-api/withProject';
+import UpdateProject from './UpdateProject';
 
 class Project extends Component {
   state = {
     show: false,
     showAlert: false,
+    ShowUpdateModel: false,
     name: '',
     description: '',
     other_details: '',
     error: null,
     projects: [],
+    projectId: null,
   };
 
   handleShow = () => {
@@ -32,7 +36,17 @@ class Project extends Component {
       show: false,
     });
   };
-
+  handleShowUpdateModel = (id) => {
+    this.setState({
+      ShowUpdateModel: true,
+      projectId: id,
+    });
+  };
+  handleUpdateCloseModel = () => {
+    this.setState({
+      ShowUpdateModel: false,
+    });
+  };
   handleAlertShow = () => {
     this.setState({
       showAlert: true,
@@ -44,6 +58,7 @@ class Project extends Component {
       showAlert: false,
     });
   };
+
   getAllProjects = () => {
     getProjects()
       .then((response) => {
@@ -113,6 +128,12 @@ class Project extends Component {
               <Button variant='primary' onClick={this.handleShow}>
                 Add Project
               </Button>
+              {this.state.ShowUpdateModel && (
+                <UpdateProject
+                  handleClose={this.handleUpdateCloseModel}
+                  projectId={this.state.projectId}
+                />
+              )}
               <CustomModal
                 show={this.state.show}
                 handleClose={this.handleClose}
@@ -193,7 +214,14 @@ class Project extends Component {
                             confirmText='Confirm'
                           />
 
-                          <Button className='mr-2' size='sm'>
+                          <Button
+                            className='mr-2'
+                            size='sm'
+                            onClick={this.handleShowUpdateModel.bind(
+                              this,
+                              project.id
+                            )}
+                          >
                             edit
                           </Button>
                           <Button
@@ -216,5 +244,5 @@ class Project extends Component {
     );
   }
 }
-
-export default withProject(Project);
+const condition = (authUser) => !!authUser;
+export default WithAuthorization(condition)(withProject(Project));

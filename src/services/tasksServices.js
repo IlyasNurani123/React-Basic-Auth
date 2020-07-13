@@ -1,9 +1,8 @@
-import Axios from 'axios';
-import { SERVER_URL_LOCAL } from '../constants';
+import Axios from '../constants/setAxiosDefaults';
 
 function getTasks() {
   return new Promise((resolve, reject) => {
-    Axios.get(`${SERVER_URL_LOCAL}/tasks`)
+    Axios.get(`/tasks`)
       .then((response) => {
         if (response) {
           resolve(response.data.data);
@@ -14,9 +13,10 @@ function getTasks() {
       });
   });
 }
-function addTask(payload) {
+
+function getTask(id) {
   return new Promise((resolve, reject) => {
-    Axios.post(`${SERVER_URL_LOCAL}/tasks`, payload)
+    Axios.get(`/task/${id}`)
       .then((response) => {
         if (response) {
           resolve(response.data.data);
@@ -28,9 +28,35 @@ function addTask(payload) {
   });
 }
 
+function addTask(payload) {
+  return new Promise((resolve, reject) => {
+    Axios.post(`/tasks`, payload)
+      .then((response) => {
+        if (response) {
+          resolve(response.data.data);
+        }
+      })
+      .catch((error) => {
+        reject(error.response);
+      });
+  });
+}
+
+function updateTask(id, payload) {
+  return new Promise((resolve, reject) => {
+    Axios.put(`/tasks/${id}`, payload)
+      .then((response) => {
+        resolve(response.data.data);
+      })
+      .catch((error) => {
+        reject(error.response);
+      });
+  });
+}
+
 function deleteTask(id) {
   return new Promise((resolve, reject) => {
-    Axios.delete(`${SERVER_URL_LOCAL}/tasks/${id}`)
+    Axios.delete(`/tasks/${id}`)
       .then((response) => {
         if (response) {
           resolve(response.data);
@@ -41,4 +67,4 @@ function deleteTask(id) {
       });
   });
 }
-export { getTasks, addTask, deleteTask };
+export { getTasks, addTask, deleteTask, getTask, updateTask };
